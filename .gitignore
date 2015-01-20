@@ -1,0 +1,12 @@
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+Makefile
+segment_renderer_release
+seg_tree_sample_release
+seg_tree_minimal_release
+nbproject
+.DS_Store
+*/.DS_Store
+*/*.pb
+*/*.txt~
