@@ -142,9 +142,13 @@ void RenderRegions(bool highlight_boundary,
 
     parent_map[mapped_id].push_back(r.id());
 
+    // Each region has a rasterization which consists of multiple scan
+    // lines (all pixels between x_left and x_right on line y are contained in the region).
     for (const auto s : r.raster().scan_inter()) {
-      const int curr_y = s.y();
+      const int curr_y = s.y(); // Get line for scan line.
       uint8_t* out_ptr = output->ptr<uint8_t>(curr_y) + channels * s.left_x();
+      
+      // out_ptr points to the current pixel.
       for (int j = 0, len = s.right_x() - s.left_x() + 1;
            j < len;
            ++j, out_ptr += channels) {

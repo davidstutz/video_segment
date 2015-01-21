@@ -195,6 +195,8 @@ private:
 // TODO(dcastro): LOWPRI: Implement an audio frame.
 
 // Basic Stream class.
+// base::TypedType simply allows different kinds of casting and provides AsPtr
+// AsRef methods.
 class DataStream : public base::TypedType {
 public:
   DataStream(const std::string& stream_name)
@@ -285,8 +287,8 @@ private:
   int frame_height_;
 };
 
-typedef std::vector<std::shared_ptr<Frame>> FrameSet;
-typedef std::vector<std::shared_ptr<DataStream>> StreamSet;
+typedef std::vector< std::shared_ptr<Frame> > FrameSet;
+typedef std::vector< std::shared_ptr<DataStream> > StreamSet;
 typedef std::shared_ptr<FrameSet> FrameSetPtr;
 
 class VideoPool;
@@ -347,7 +349,7 @@ public:
   // corresponding *FromSender decorator functions.
   // VideoUnit::Run() is designed to make calls to the decorator functions.
 
-  // OpensStreams gets passed a StreamSet that holds all Streams created by parents of
+  // OpenStreams gets passed a StreamSet that holds all Streams created by parents of
   // the current unit. Use to determine index of streams you are interested in or
   // to add additional streams.
   virtual bool OpenStreams(StreamSet* set) { return true; }

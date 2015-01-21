@@ -79,6 +79,10 @@ private:
 
 private:
   bool source_exhausted_;
+  
+  // In video_unit.h:
+  // typedef std::vector< std::shared_ptr<Frame> > FrameSet;
+  // typedef std::shared_ptr<FrameSet> FrameSetPtr;
   concurrent_queue<FrameSetPtr> frameset_queue_;
 
   int frame_number_;

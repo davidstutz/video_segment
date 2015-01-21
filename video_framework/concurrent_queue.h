@@ -8,6 +8,11 @@
 #include <boost/thread.hpp>
 #include <boost/thread/thread_time.hpp>
 
+/**
+ * Concurrent queue: wrapper around basic Boost queue  protected by a mutex.
+ * 
+ * @see http://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html
+ */
 template<typename Data>
 class concurrent_queue {
 private:

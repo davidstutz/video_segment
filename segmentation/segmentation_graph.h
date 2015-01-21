@@ -83,8 +83,8 @@ namespace segmentation {
 // };
 
 // Fast O(n) implementation that replaces sorting stage of with bucket-sorting.
-// Edge weight domain [0, max_weight] is partioned into equally sized buckets.
-// In addition, each bucket representing a specific weight is partioned into a bucket
+// Edge weight domain [0, max_weight] is partitioned into equally sized buckets.
+// In addition, each bucket representing a specific weight is partitioned into a bucket
 // list. This enables creation of the graph in parallel, as well as partial segmentation.
 // 
 // General algorithm:
@@ -301,7 +301,7 @@ protected:
   // List of intervals denoting virtual nodes. Left bound is inclusive,
   // right bound exclusive.
   // Virtual nodes constraints are never reset.
-  std::vector<std::pair<int, int>> virtual_nodes_;
+  std::vector< std::pair<int, int> > virtual_nodes_;
 
   // Edge buckets are partioned into BucketLists, e.g. to separate different kinds
   // of connections.
@@ -309,7 +309,7 @@ protected:
   // Each bucket is of actual size num_buckets + 1, where last bucket is used
   // for virtual edges (not used during segmentation, only to estabilish neighboring
   // information).
-  std::vector<std::vector<EdgeList>> bucket_lists_;
+  std::vector< std::vector<EdgeList> > bucket_lists_;
 
   bool flattened_ = false;
 
@@ -356,6 +356,7 @@ void FastSegmentationGraph<SegTraits>::SegmentGraph(
   std::vector<int> all_bucket_lists;
   if (bucket_list_ids == nullptr) {
     all_bucket_lists.resize(bucket_lists_.size());
+    // FIlls the list with incremental values starting with 0.
     std::iota(all_bucket_lists.begin(), all_bucket_lists.end(), 0);
     bucket_list_ids = &all_bucket_lists;
   }

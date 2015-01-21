@@ -189,11 +189,11 @@ class DenseSegmentation : public DenseSegGraphCreatorInterface {
   // Processes chunk boundary (segments and outputs results). If flush is false,
   // sets up new constrained Segmentation object.
   void ChunkBoundaryOutput(bool flush,
-                           std::vector<std::unique_ptr<SegmentationDesc>>* results);
+                           std::vector< std::unique_ptr<SegmentationDesc> >* results);
 
   // Called by above function for actual segmentation and output of results.
   void SegmentAndOutputChunk(bool flush,
-                             std::vector<std::unique_ptr<SegmentationDesc>>* results);
+                             std::vector< std::unique_ptr<SegmentationDesc> >* results);
 
   DenseSegmentationOptions options_;
   int frame_width_ = 0;
@@ -217,14 +217,14 @@ class DenseSegmentation : public DenseSegGraphCreatorInterface {
 
   // Buffer for passed images and flow.
   // Due to parallel graph construction we keep a deep copy.
-  std::vector<std::vector<cv::Mat>> feature_buffer_;
+  std::vector< std::vector<cv::Mat> > feature_buffer_;
   std::vector<cv::Mat> flow_buffer_;
 
   // Start of the current chunk in above buffers.
   int curr_chunk_start_ = 0;
 
   // Segmentation results in previous overlap.
-  std::vector<std::unique_ptr<SegmentationDesc>> overlap_segmentations_;
+  std::vector< std::unique_ptr<SegmentationDesc> > overlap_segmentations_;
 
   // Underlying segmentation object.
   std::unique_ptr<Segmentation> seg_;

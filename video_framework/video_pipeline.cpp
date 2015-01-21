@@ -50,6 +50,7 @@ void VideoPipelineSink::ProcessFrame(FrameSetPtr input, list<FrameSetPtr>* outpu
 
 bool VideoPipelineSink::TryFetchingFrameSet(FrameSetPtr* ptr) {
   FrameSetPtr local_ptr;
+  // Tries to get a frameset from the queue, returns false if failed.
   const bool success = frameset_queue_.try_pop(&local_ptr);
   if (success) {
     ptr->swap(local_ptr);
@@ -79,6 +80,7 @@ bool VideoPipelineSource::OpenStreams(StreamSet* set) {
   return true;
 }
 
+// Invoked by VideoPipelineInvoker.
 bool VideoPipelineSource::Run() {
   while (!(sink_->IsExhausted() && sink_->GetQueueSize() == 0)) {
     FrameSetPtr frame_set_ptr;
@@ -88,11 +90,12 @@ bool VideoPipelineSource::Run() {
       timeout = 1.0f / max_fps_ * 1e6;  // in micros.
     }
 
+    // Get the next frameset
     if (sink_->TryFetchingFrameSet(&frame_set_ptr)) {
       // Measure time difference.
       boost::posix_time::ptime curr_time =
           boost::posix_time::microsec_clock::local_time();
-
+      
       if (frame_num_ > 0) {
         float micros_passed = boost::posix_time::time_period(
             prev_process_time_, curr_time).length().total_microseconds();
@@ -117,13 +120,15 @@ bool VideoPipelineSource::Run() {
       // Update processing time.
       prev_process_time_ = boost::posix_time::microsec_clock::local_time();
 
-      // Pass to children.
+      // Allow all children to process frameset, that is the actual
+      // processing units.
       for (auto child : children_) {
         child->ProcessFrameImpl(frame_set_ptr, this);
       }
 
       ++frame_num_;
     } else {
+      // Could not fetch a frameset from the sink.
       OnIdle();
       boost::thread::sleep(boost::get_system_time() +
                            boost::posix_time::microseconds(timeout / 5));
@@ -136,7 +141,6 @@ bool VideoPipelineSource::Run() {
 
 void VideoPipelineSource::OnIdle() {
   if (idle_unit_) {
-    // Call idle_unit PostProcess.
     idle_unit_->ProcessFrameImpl(FrameSetPtr(new FrameSet()), this);
   }
 }

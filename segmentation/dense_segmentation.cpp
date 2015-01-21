@@ -109,7 +109,8 @@ int DenseSegmentation::ProcessFrame(
     bool flush,
     const std::vector<cv::Mat>* features,
     const cv::Mat* flow,  // optional.
-    std::vector<std::unique_ptr<SegmentationDesc>>* results) {
+    std::vector< std::unique_ptr<SegmentationDesc> >* results) {
+  
   if (seg_ == nullptr) {
     SegmentationOptions seg_options;
     GetSegmentationOptions(&seg_options);
@@ -142,13 +143,15 @@ int DenseSegmentation::ProcessFrame(
       }
     }
 
+    // Pass preprocessed features.
     AddFrameToSegmentationFromFeatures(feature_buffer_.back(), nullptr);
 
+    // In the case when there are more than one images.
     if (feature_buffer_.size() > 1) {
       // Connect temporally.
       ConnectSegmentationTemporallyFromFeatures(
-          feature_buffer_.end()[-1],
-          feature_buffer_.end()[-2],
+          feature_buffer_.end()[-1], // Last feature.
+          feature_buffer_.end()[-2], // Previous feature.
           flow_buffer_.empty() ? nullptr : &flow_buffer_.back());
     }
     ++input_frames_;
@@ -158,6 +161,7 @@ int DenseSegmentation::ProcessFrame(
     ChunkBoundaryOutput(flush, results);
     return results->size();
   }
+  
   return 0;
 }
 
@@ -207,6 +211,7 @@ void DenseSegmentation::AddFrameToSegmentationFromFeatures(
   switch (options_.color_distance) {
     case DenseSegmentationOptions::COLOR_DISTANCE_L2: {
       SpatialCvMatDistance3L2 color_distance(input_frame);
+      // Basically calls Segmentation.addGenericImage
       AddFrameToSegmentation(color_distance, constrained_segmentation);
       break;
     }
@@ -232,6 +237,7 @@ void DenseSegmentation::ConnectSegmentationTemporallyFromFeatures(
   switch (options_.color_distance) {
     case DenseSegmentationOptions::COLOR_DISTANCE_L2: {
       TemporalCvMatDistance3L2 temporal_distance(curr_frame, prev_frame);
+      // Basically calls Segmentation.ConnectTemporally.
       ConnectSegmentationTemporally(temporal_distance, flow);
       break;
     }
@@ -244,14 +250,15 @@ void DenseSegmentation::ConnectSegmentationTemporallyFromFeatures(
   }
 }
 
-struct DistanceColorL2 : DistanceTraits<SpatialCvMatDistance3L2,
-                                        TemporalCvMatDistance3L2> { };
+struct DistanceColorL2 : DistanceTraits<SpatialCvMatDistance3L2, TemporalCvMatDistance3L2> {
+  
+};
 
-struct DistanceColorL1 : DistanceTraits<SpatialCvMatDistance3L1,
-                                        TemporalCvMatDistance3L1> { };
+struct DistanceColorL1 : DistanceTraits<SpatialCvMatDistance3L1, TemporalCvMatDistance3L1> {
+  
+};
 
-DenseSegGraphInterface* DenseSegmentation::CreateDenseSegGraph(
-    int frame_width, int frame_height, int chunk_size) const {
+DenseSegGraphInterface* DenseSegmentation::CreateDenseSegGraph(int frame_width, int frame_height, int chunk_size) const {
   switch (options_.color_distance) {
     case DenseSegmentationOptions::COLOR_DISTANCE_L2:
       // TODO(grundman): Option for cutoffs.
@@ -279,7 +286,7 @@ void DenseSegmentation::GetSegmentationOptions(SegmentationOptions* options) con
 }
 
 void DenseSegmentation::ChunkBoundaryOutput(
-    bool flush, std::vector<std::unique_ptr<SegmentationDesc>>* results) {
+    bool flush, std::vector< std::unique_ptr<SegmentationDesc> >* results) {
   LOG(INFO) << "Chunk boundary reached " << chunk_id_;
   SegmentAndOutputChunk(flush, results);
 
@@ -331,7 +338,7 @@ void DenseSegmentation::ChunkBoundaryOutput(
 }
 
 void DenseSegmentation::SegmentAndOutputChunk(
-    bool flush, std::vector<std::unique_ptr<SegmentationDesc>>* results) {
+    bool flush, std::vector< std::unique_ptr<SegmentationDesc> >* results) {
   // Compute resolution dependent min region size.
   seg_->RunOverSegmentation(flow_buffer_.empty() ? nullptr : &flow_buffer_);
 

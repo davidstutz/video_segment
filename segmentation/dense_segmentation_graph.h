@@ -188,6 +188,7 @@ public:
   int FrameNumber() const { return num_frames_; }
   int MaxFrames() const { return max_frames_; }
 
+  // Used for parallel construction of graph.
   class AddSpatialEdgesInvoker {
    public:
     AddSpatialEdgesInvoker(const SpatialDistance& distance, int frame_idx,
@@ -205,6 +206,7 @@ public:
     DenseSegmentationGraph* dense_graph_;
   };
 
+  // Used for parallel construction of graph.
   template<class Distance> class AddTemporalEdgesInvoker {
    public:
     AddTemporalEdgesInvoker(const Distance& distance, int frame_idx,
@@ -397,6 +399,7 @@ void DenseSegmentationGraph<DistanceTraits, DescriptorTraits>::
 template<class DistanceTraits, class DescriptorTraits>
 void DenseSegmentationGraph<DistanceTraits, DescriptorTraits>::FinishBuildingGraph() {
   if (FLAGS_parallel_graph_construction) {
+    // Wait for all threads to finish execution.
     for (std::thread& thread : add_edges_tasks_) {
       thread.join();
     }

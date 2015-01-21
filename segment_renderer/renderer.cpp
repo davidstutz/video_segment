@@ -219,9 +219,10 @@ int main(int argc, char** argv) {
   }
 
   std::unique_ptr<VideoWriterUnit> writer_unit;
+  // If a video output file is requested.
   if (video_output) {
     // Create VideoStream manually to use video renderer if needed.
-    StreamSet stream_set;
+    StreamSet stream_set; // typedef std::vector< std::shared_ptr<DataStream> > StreamSet
     stream_set.emplace_back(new VideoStream(frame_width,
                                             frame_height,
                                             width_step,
@@ -245,7 +246,7 @@ int main(int argc, char** argv) {
   }
 
   // Keeps current hierarchy per chunk.
-  Hierarchy hierarchy;
+  Hierarchy hierarchy; // typedef google::protobuf::RepeatedPtrField<HierarchyLevel> Hierarchy
   // Absolute render level (constant across all chunks).
   int absolute_level = -1;
 
@@ -262,12 +263,14 @@ int main(int argc, char** argv) {
       hierarchy = segmentation.hierarchy();
       // Convert fractional to constant absolute level.
       if (absolute_level < 0) {
+        // Integer multiplication.
         absolute_level = FLAGS_render_level * (float)hierarchy.size();
       }
     }
 
     std::unique_ptr<VideoFrame> curr_frame;
     cv::Mat frame_view;
+    // If a video output file is requested.
     if (video_output) {              // Use VideoFrame as default backing store.
       curr_frame.reset(new VideoFrame(frame_width,
                                       frame_height,
@@ -280,6 +283,7 @@ int main(int argc, char** argv) {
       frame_view.setTo(0);
     }
 
+    // Will be empty if no JSON file was provided.
     if (project_regions.empty()) {
       RenderRegionsRandomColor(FLAGS_render_level,
                                true,     // With boundaries.
@@ -295,6 +299,7 @@ int main(int argc, char** argv) {
                     &frame_view);
     }
 
+    // If image output was requested.
     if (image_output) {
       std::string output_file = base::StringPrintf("%s/frame%05d.png",
                                                    FLAGS_output_image_dir.c_str(),
@@ -303,7 +308,10 @@ int main(int argc, char** argv) {
     }
 
     if (video_output) {
-      FrameSetPtr frame_set(new FrameSet());
+      FrameSetPtr frame_set(new FrameSet()); // typedef std::shared_ptr<FrameSet> FrameSetPtr
+                                             // typedef std::vector< std::shared_ptr<Frame> > FrameSet
+      
+      // .release() returns a pointer and forgots ownership.
       frame_set->emplace_back(curr_frame.release());
       std::list<FrameSetPtr> unused_output;
       writer_unit->ProcessFrame(frame_set, &unused_output);
