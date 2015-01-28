@@ -1,0 +1,3 @@
+[submodule "intrinsic/limare2011-intrinsic-images"]
+	path = intrinsic/limare2011-intrinsic-images
+	url = https://github.com/davidstutz/limare2011-intrinsic-images
