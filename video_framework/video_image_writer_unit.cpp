@@ -46,6 +46,7 @@ namespace video_framework {
   }
   
   bool VideoImageWriterUnit::OpenStreams(StreamSet* set) {
+    LOG(INFO) << "VideoImageWriterUnit reading from stream " << options_.video_stream_name << "\n";
     video_stream_idx_ = FindStreamIdx(options_.video_stream_name, set);
     
     if (video_stream_idx_ < 0) {

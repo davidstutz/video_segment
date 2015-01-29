@@ -54,6 +54,8 @@ if (UNIX)
   endif (APPLE)
 endif (UNIX)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
+
 if (APPLE)
   set(CMAKE_HOST_SYSTEM_PROCESSOR "x86_64")
 endif (APPLE)

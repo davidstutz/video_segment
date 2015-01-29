@@ -1,0 +1,9 @@
+find_package(OpenCV2 REQUIRED)
+
+set(DEPENDENT_PACKAGES base video_framework)
+
+set(DEPENDENT_INCLUDES ${OpenCV_INCLUDE_DIRS})
+
+set(DEPENDENT_LIBRARIES ${OpenCV_LIBRARIES})
+
+set(CREATED_PACKAGES retinex_pde)

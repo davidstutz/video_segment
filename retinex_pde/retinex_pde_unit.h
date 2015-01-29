@@ -31,9 +31,12 @@
 
 #include "video_framework/video_unit.h"
 #include <opencv2/opencv.hpp>
+#include <string>
 
 namespace retinex {
-    
+  
+  using namespace video_framework;
+  
   /**
    * Options for the RetinexPDE.
    * 
@@ -45,6 +48,9 @@ namespace retinex {
      * For images in RGB 8 bit color space, the threshold should be in (0,255].
      */
     float threshold = 10;
+    std::string video_stream_name = "VideoStream";
+    std::string reflectance_stream_name = "ReflectanceStream";
+    std::string shading_stream_name = "ShadingStream";
   };
   
   /**
@@ -53,7 +59,7 @@ namespace retinex {
    * 
    * @author David Stutz
    */
-  class RetinexPDEUnit : video_framework::VideoUnit {
+  class RetinexPDEUnit : public VideoUnit {
   public:
     /**
      * Constructor, given Retinex PDE options, constructs
@@ -63,13 +69,17 @@ namespace retinex {
      */
     RetinexPDEUnit(RetinexPDEOptions& options);
     
-    virtual bool OpenStreams(video_framework::StreamSet* set);
-    virtual void ProcessFrame(video_framework::FrameSetPtr input, std::list<video_framework::FrameSetPtr>* output);
-    virtual bool PostProcess(std::list<video_framework::FrameSetPtr>* append);
+    virtual bool OpenStreams(StreamSet* set);
+    virtual void ProcessFrame(FrameSetPtr input, std::list<FrameSetPtr>* output);
+    virtual bool PostProcess(std::list<FrameSetPtr>* append);
     
   protected:
-    
-    RetinexPDEOptions options;
+    RetinexPDEOptions options_;
+    int video_stream_idx_;
+    int input_frames_ = 0;
+    int frame_width_;
+    int frame_height_;
+    int frame_width_step_;
   };
 }
 
