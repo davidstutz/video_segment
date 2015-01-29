@@ -10,8 +10,22 @@ Declares the following classes:
 
 `VideoUnit` is the base class for all video processing units and pipeline units (`VideoPipelineSink` and `VideoPipelineSource`). Each `VideoUnit` may have several child-`VideoUnit`'s (e.g. using `.attachTo(...)`).
 
+Declares the following functions:
+
+- `PixelFormatToNumChannels`
+
 ## VideoWriterUnit `video_writer_unit.h`
 
 ## VideoPipelineSink, VideoPipelineSource, VideoPipelineInvoker `video_pipeline.h`
 
-Both `VideoPipelineSInk` and `VideoPipelinSource` inherit from `VideoUnit`.
+## LuminanceUnit, FlipBGRUnit, ColorTwist `conversion_unit.h`
+
+Declares conversion units:
+
+- `LuminanceUnit` changes the color format of the frames specified by the `PIXEL_FORMAT_*` constants (defined in `video_unit.h`).
+- `FlipBGRUnit` flips the B and R in BGR/RGB.
+- `ColorTwist` applies a twist weight*color + offset clipped to [0, 255].
+
+## VideoImageWriterUnit `video_image_writer_unit`
+
+Simple unit for demonstration/learning purposes: saves all frames of a video read by a `VideoReaderUnit` at a specific location. See `video_image_writer/video_image_writer.cpp` for usage.

@@ -26,37 +26,52 @@
 //
 // ---
 
-#ifndef VIDEO_SEGMENT_BASE_BASE_IMPL_H__
-#define VIDEO_SEGMENT_BASE_BASE_IMPL_H__
+#ifndef VIDEO_SEGMENT_INTRINSIC_RETINEX_PDE_UNIT_H
+#define	VIDEO_SEGMENT_INTRINSIC_RETINEX_PDE_UNIT_H
 
-// To be included in implementation files.
+#include "video_framework/video_unit.h"
+#include <opencv2/opencv.hpp>
 
-#include "base/base.h"
+namespace retinex {
+    
+  /**
+   * Options for the RetinexPDE.
+   * 
+   * @author David Stutz
+   */
+  struct RetinexPDEOptions {
+    /**
+     * The threshold to use for Retinex PDE.
+     * For images in RGB 8 bit color space, the threshold should be in (0,255].
+     */
+    float threshold = 10;
+  };
+  
+  /**
+   * Retinex PDE Unit to apply the Retinex PDE algorithm on each individual
+   * frame.
+   * 
+   * @author David Stutz
+   */
+  class RetinexPDEUnit : video_framework::VideoUnit {
+  public:
+    /**
+     * Constructor, given Retinex PDE options, constructs
+     * a video unit applzing Retinex PDE to each frame.
+     * 
+     * @param options
+     */
+    RetinexPDEUnit(RetinexPDEOptions& options);
+    
+    virtual bool OpenStreams(video_framework::StreamSet* set);
+    virtual void ProcessFrame(video_framework::FrameSetPtr input, std::list<video_framework::FrameSetPtr>* output);
+    virtual bool PostProcess(std::list<video_framework::FrameSetPtr>* append);
+    
+  protected:
+    
+    RetinexPDEOptions options;
+  };
+}
 
-using std::vector;
-using std::list;
-using std::pair;
-using std::shared_ptr;
-using std::unique_ptr;
+#endif	/* RETINEX_PDE_UNIT_H */
 
-#include <unordered_map>
-using std::unordered_map;
-
-#include <unordered_set>
-using std::unordered_set;
-
-#include <functional>
-
-namespace base {
-
-// Like snprintf but for strings.
-std::string StringPrintf(const char* format, ...);
-
-// Returns true, if file exists.
-// TODO: this actually does not return true iff the file exists, but when the
-// location exists (could also be a directory ...).
-bool FileExists(const std::string& file);
-
-}  // namespace base.
-
-#endif   // VIDEO_SEGMENT_BASE_BASE_IMPL_H__

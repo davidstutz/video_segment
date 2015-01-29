@@ -26,37 +26,52 @@
 //
 // ---
 
-#ifndef VIDEO_SEGMENT_BASE_BASE_IMPL_H__
-#define VIDEO_SEGMENT_BASE_BASE_IMPL_H__
+#include "video_image_writer_unit.h"
+#include <opencv2/opencv.hpp>
 
-// To be included in implementation files.
-
-#include "base/base.h"
-
-using std::vector;
-using std::list;
-using std::pair;
-using std::shared_ptr;
-using std::unique_ptr;
-
-#include <unordered_map>
-using std::unordered_map;
-
-#include <unordered_set>
-using std::unordered_set;
-
-#include <functional>
-
-namespace base {
-
-// Like snprintf but for strings.
-std::string StringPrintf(const char* format, ...);
-
-// Returns true, if file exists.
-// TODO: this actually does not return true iff the file exists, but when the
-// location exists (could also be a directory ...).
-bool FileExists(const std::string& file);
-
-}  // namespace base.
-
-#endif   // VIDEO_SEGMENT_BASE_BASE_IMPL_H__
+namespace video_framework {
+  
+  namespace {
+    inline char DirectorySeparator() {
+      #ifdef _WIN32
+          return '\\';
+      #else
+          return '/';
+      #endif
+    }
+  }
+  
+  VideoImageWriterUnit::VideoImageWriterUnit(VideoImageWriterOptions options) : options_(options) {
+    
+  }
+  
+  bool VideoImageWriterUnit::OpenStreams(StreamSet* set) {
+    video_stream_idx_ = FindStreamIdx(options_.video_stream_name, set);
+    
+    if (video_stream_idx_ < 0) {
+      LOG(ERROR) << "Could not find Video stream!\n";
+      return false;
+    }
+    
+    return true;
+  }
+  
+  void VideoImageWriterUnit::ProcessFrame(FrameSetPtr input, std::list<FrameSetPtr>* output) {
+    const VideoFrame* frame = input->at(video_stream_idx_)->AsPtr<VideoFrame>();
+    
+    cv::Mat frame_mat;
+    frame->MatView(&frame_mat);
+    
+    std::string path = options_.folder + DirectorySeparator() + std::to_string(input_frames_) + ".png";
+    LOG(INFO) << "Writing frame #" << input_frames_ << ": " << path << "\n";
+    
+    cv::imwrite(options_.folder + DirectorySeparator() + std::to_string(input_frames_) + ".png", frame_mat);
+    ++input_frames_;
+   
+    output->push_back(input);
+  }
+  
+  bool VideoImageWriterUnit::PostProcess(std::list<FrameSetPtr>* append) {
+    return false;
+  }
+} /* video_framework */

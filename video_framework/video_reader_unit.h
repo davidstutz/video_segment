@@ -78,6 +78,23 @@ class VideoReaderUnit : public VideoUnit {
   // Can be positive or negative.
   bool SkipFrames(int frame_offset);
 
+  int FrameHeight() {
+    return frame_height_;
+  }
+  int FrameWidth() {
+    return frame_width_;
+  }
+  
+  int OutputHeight() {
+    return output_height_;
+  }
+  int OutputWidth() {
+    return output_width_;
+  }
+  int OutputWidthStep() {
+    return output_width_step_;
+  }
+  
  private:
   // Returns allocated VideoFrame (ownership passed to caller).
   // Returns NULL if end of file is reached.

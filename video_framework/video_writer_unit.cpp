@@ -141,6 +141,7 @@ bool VideoWriterUnit::OpenStreams(StreamSet* set) {
   codec_context_ = video_stream_->codec;
   const std::string file_ending = video_file_.substr(video_file_.size() - 3);
   if (file_ending == "mp4" || file_ending == "mov") {
+    LOG(INFO) << "Using CODEC_ID_H264.\n";
     codec_context_->codec_id = CODEC_ID_H264;
   } else {
     codec_context_->codec_id = output_format_->video_codec;
@@ -192,6 +193,8 @@ bool VideoWriterUnit::OpenStreams(StreamSet* set) {
   }
 
   // Find and open codec.
+  // When using CODEC_ID_H264 (for .mp4 and .mov), this may result in an error,
+  // when ffmpeg is not installed with libx264 support.
   codec_ = avcodec_find_encoder(codec_context_->codec_id);
   if (!codec_) {
     LOG(ERROR) << "Codec not found.";
@@ -230,13 +233,14 @@ bool VideoWriterUnit::OpenStreams(StreamSet* set) {
 
   // Open output file, if needed.
   if(!(output_format_->flags & AVFMT_NOFILE)) {
+    LOG(INFO) << "Opening output file.\n";
     if (avio_open(&format_context_->pb, video_file_.c_str(), AVIO_FLAG_WRITE) < 0) {
       LOG(ERROR) << " Could not open" << video_file_;
       return false;
     }
   }
-
-  avformat_write_header(format_context_,0);
+  
+  avformat_write_header(format_context_, NULL);
 
   // Setup color conversion.
   sws_context_ = sws_getContext(frame_width_,

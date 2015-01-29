@@ -1,0 +1,1 @@
+add_subdirectory(limare2011-intrinsic-images)

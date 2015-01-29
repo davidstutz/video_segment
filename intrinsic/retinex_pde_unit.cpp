@@ -26,37 +26,12 @@
 //
 // ---
 
-#ifndef VIDEO_SEGMENT_BASE_BASE_IMPL_H__
-#define VIDEO_SEGMENT_BASE_BASE_IMPL_H__
+#include "retinex_pde_unit.h"
 
-// To be included in implementation files.
-
-#include "base/base.h"
-
-using std::vector;
-using std::list;
-using std::pair;
-using std::shared_ptr;
-using std::unique_ptr;
-
-#include <unordered_map>
-using std::unordered_map;
-
-#include <unordered_set>
-using std::unordered_set;
-
-#include <functional>
-
-namespace base {
-
-// Like snprintf but for strings.
-std::string StringPrintf(const char* format, ...);
-
-// Returns true, if file exists.
-// TODO: this actually does not return true iff the file exists, but when the
-// location exists (could also be a directory ...).
-bool FileExists(const std::string& file);
-
-}  // namespace base.
-
-#endif   // VIDEO_SEGMENT_BASE_BASE_IMPL_H__
+namespace retinex {
+  RetinexPDEUnit::RetinexPDEUnit(RetinexPDEOptions& options) : options(options) {
+    
+  }
+  
+  
+}

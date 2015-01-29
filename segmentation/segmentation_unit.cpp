@@ -118,9 +118,11 @@ std::unique_ptr<DenseSegmentation> DenseSegmentationUnit::CreateDenseSegmentatio
 void DenseSegmentationUnit::ProcessFrame(FrameSetPtr input, list<FrameSetPtr>* output) {
   VLOG(1) << "Processing frame #" << input_frames_;
 
+  // A vector ov simple images are used as features (appearance only).
   vector<cv::Mat> features;
   ExtractFrameSetFeatures(input, &features);
 
+  // Get flow for frame if this is not the first frame.
   cv::Mat flow;
   if (input_frames_ > 0 && flow_stream_idx_ >= 0) {
     const DenseFlowFrame& flow_frame =
@@ -152,7 +154,7 @@ void DenseSegmentationUnit::ExtractFrameSetFeatures(
 }
 
 bool DenseSegmentationUnit::PostProcess(list<FrameSetPtr>* append) {
-  vector<std::unique_ptr<SegmentationDesc>> results;
+  vector< std::unique_ptr<SegmentationDesc> > results;
   if (dense_seg_->ProcessFrame(true, nullptr, nullptr, &results) > 0) {
     OutputSegmentation(&results, append);
   }
@@ -161,7 +163,7 @@ bool DenseSegmentationUnit::PostProcess(list<FrameSetPtr>* append) {
 }
 
 void DenseSegmentationUnit::OutputSegmentation(
-    std::vector<std::unique_ptr<SegmentationDesc>>* results,
+    std::vector< std::unique_ptr<SegmentationDesc> >* results,
     std::list<FrameSetPtr>* output) {
   for (int k = 0; k < results->size(); ++k) {
     FrameSetPtr frame_set = frame_set_buffer_.front();
@@ -248,7 +250,7 @@ void RegionSegmentationUnit::ProcessFrame(FrameSetPtr input, list<FrameSetPtr>* 
   ExtractFrameSetFeatures(input, &features);
   frame_set_buffer_.push_back(input);
 
-  vector<std::unique_ptr<SegmentationDesc>> results;
+  vector< std::unique_ptr<SegmentationDesc> > results;
   region_seg_->ProcessFrame(false,
                             desc,
                             &features,
@@ -274,7 +276,7 @@ void RegionSegmentationUnit::ProcessFrame(FrameSetPtr input, list<FrameSetPtr>* 
 }
 
 bool RegionSegmentationUnit::PostProcess(list<FrameSetPtr>* append) {
-  vector<std::unique_ptr<SegmentationDesc>> results;
+  vector< std::unique_ptr<SegmentationDesc> > results;
   if (region_seg_->ProcessFrame(true, nullptr, nullptr, &results) > 0) {
     OutputSegmentation(&results, append);
   }
@@ -282,7 +284,7 @@ bool RegionSegmentationUnit::PostProcess(list<FrameSetPtr>* append) {
 }
 
 void RegionSegmentationUnit::OutputSegmentation(
-    std::vector<std::unique_ptr<SegmentationDesc>>* results,
+    std::vector< std::unique_ptr<SegmentationDesc> >* results,
     std::list<FrameSetPtr>* output) {
   for (int k = 0; k < results->size(); ++k) {
     FrameSetPtr frame_set = frame_set_buffer_.front();

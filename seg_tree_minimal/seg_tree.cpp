@@ -89,6 +89,8 @@ int main(int argc, char** argv) {
   reader.reset(new vf::VideoReaderUnit(reader_options, FLAGS_input_file));
   root = input = reader.get();
 
+  // Tree:
+  // sink ---> reader
   sinks.emplace_back(new vf::VideoPipelineSink());
   sinks.back()->AttachTo(input);
   vf::SourceRatePolicy srp;
@@ -98,6 +100,9 @@ int main(int argc, char** argv) {
     srp.rate_scale = 1.25f;
     srp.sink_max_queue_size = 10;
   }
+  
+  // Tree: 
+  // source ---> sink ---> reader
   sources.emplace_back(new vf::VideoPipelineSource(sinks.back().get(), nullptr, srp));
   input = sources.back().get();
 
@@ -108,11 +113,15 @@ int main(int argc, char** argv) {
 
   if (FLAGS_flow) {
     if (use_flow_from_file) {
+      // Tree:
+      // flow ---> source ---> sink ---> reader
       dense_flow_reader.reset(new vf::DenseFlowReaderUnit(vf::DenseFlowReaderOptions(), flow_file));
       dense_flow_reader->AttachTo(input);
       input = dense_flow_reader.get();
     }
     else {
+      // Tree:
+      // lum ---> source ---> sink ---> reader
       lum_unit.reset(new vf::LuminanceUnit(vf::LuminanceOptions()));
       lum_unit->AttachTo(input);
       vf::DenseFlowOptions flow_options;
@@ -120,10 +129,14 @@ int main(int argc, char** argv) {
       flow_options.num_warps = 2;
       flow_options.video_out_stream_name = "";
 
+      // Tree:
+      // flow ---> lum ---> source ---> sink ---> reader
       dense_flow_unit.reset(new vf::DenseFlowUnit(flow_options));
       dense_flow_unit->AttachTo(lum_unit.get());
       input = dense_flow_unit.get();
 
+      // Tree:
+      // source ---> sink ---> flow ---> lum ---> source ---> sink ---> reader
       sinks.emplace_back(new vf::VideoPipelineSink());
       sinks.back()->AttachTo(input);
       sources.back()->SetMonitorSink(sinks.back().get());
@@ -139,9 +152,13 @@ int main(int argc, char** argv) {
   std::unique_ptr<seg::DenseSegmentationUnit> dense_segment(
       new seg::DenseSegmentationUnit(dense_seg_unit_options, &dense_seg_options));
 
+  // Tree:
+  // dense ---> source ---> sink ---> flow ---> lum --> source ---> sink ---> reader
   dense_segment->AttachTo(input);
   input = dense_segment.get();
-
+  
+  // Tree:
+  // source ---> sink ---> dense ---> source ---> sink ---> flow ---> lum --> source ---> sink ---> reader
   sinks.emplace_back(new vf::VideoPipelineSink());
   sinks.back()->AttachTo(input);
   sources.emplace_back(new vf::VideoPipelineSource(sinks.back().get()));
@@ -156,6 +173,8 @@ int main(int argc, char** argv) {
   region_segment->AttachTo(input);
   input = region_segment.get();
 
+  // Tree:
+  // source ---> sink ---> region ---> source ---> sink ---> dense ---> source ---> sink ---> flow ---> lum --> source ---> sink ---> reader
   sinks.emplace_back(new vf::VideoPipelineSink());
   sinks.back()->AttachTo(input);
   sources.emplace_back(new vf::VideoPipelineSource(sinks.back().get()));

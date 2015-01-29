@@ -21,10 +21,13 @@ a fresh installation of Ubuntu 14.04 LTS. [You may see those here](https://docs.
 
 ## Documentation
 
-There are several resources for divingdirectly into the code:
+There are several resources for diving directly into the code:
 
 - Using Google Protocol Buffers, C++ Tutorial: [https://developers.google.com/protocol-buffers/docs/cpptutorial](https://developers.google.com/protocol-buffers/docs/cpptutorial).
+- [How To Use Google Commandline Flags (gflags)](http://google-gflags.googlecode.com/svn/trunk/doc/gflags.html).
+- [How To Use Google Logging Library (glog)](https://google-glog.googlecode.com/svn/trunk/doc/glog.html).
 - `seg_tree_minimal` contains a minimal example of `seg_tree_sample` in order to understand the video and segmentation framework.
+- `video_image_writer` contains a minimal example of how to use the video pipeline. The corresponding `VideoImageWriterUnit` can be found in `video_framework/video_image_writer_unit.h` and gives an example of a simple video unit.
 - Some folders may contain additional `README.md`'s with further documentation.
 
 ## Building
@@ -72,6 +75,10 @@ Example (to render segmentation result at 10% of hierarchy to video):
     ./segment_viewer --input=INPUT.pb
 
 - video_example: Example to run video_framework single threaded or as pipeline
+
+## Known Issues / Questions
+
+* `VideoWriterUnit` tries to use the libx264 codec for files with `.mov` or `.mp4` extensions (note the lowercase), however, libx264 is not listed as dependency and installing libx264 through `sudo apt-get install libx264-dev` may not be the required version for the latest FFMPEG.
 
 ## Reference
 

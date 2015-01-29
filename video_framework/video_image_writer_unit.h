@@ -26,37 +26,49 @@
 //
 // ---
 
-#ifndef VIDEO_SEGMENT_BASE_BASE_IMPL_H__
-#define VIDEO_SEGMENT_BASE_BASE_IMPL_H__
+#ifndef VIDEO_SEGMENT_VIDEO_FRAMEWORK_VIDEO_IMAGE_WRITER_UNIT_H
+#define	VIDEO_SEGMENT_VIDEO_FRAMEWORK_VIDEO_IMAGE_WRITER_UNIT_H
 
-// To be included in implementation files.
+#include "video_unit.h"
+#include <string>
 
-#include "base/base.h"
+namespace video_framework {
+  
+  /**
+   * Options for the VideoImageWriterUnit.\
+   * 
+   * @author David Stutz
+   */
+  struct VideoImageWriterOptions {
+    /**
+     * Folder to store the images.
+     */
+    std::string folder;
+    /**
+     * Input stream name.
+     */
+    std::string video_stream_name = "VideoStream";
+  };
+  
+  /**
+   * Unit used to write the video as image sequence to the folder
+   * given by the VideoImageWriterOptions struct.
+   * 
+   * @author David Stutz
+   */
+  class VideoImageWriterUnit : public VideoUnit {
+  public:
+    VideoImageWriterUnit(VideoImageWriterOptions options);
+    virtual bool OpenStreams(StreamSet* set);
+    virtual void ProcessFrame(FrameSetPtr input, std::list<FrameSetPtr>* output);
+    virtual bool PostProcess(std::list<FrameSetPtr>* append);
+    
+  protected:
+    VideoImageWriterOptions options_;
+    int video_stream_idx_;
+    int input_frames_ = 0;
+  };
+} /* video_framework */
 
-using std::vector;
-using std::list;
-using std::pair;
-using std::shared_ptr;
-using std::unique_ptr;
+#endif	/* VIDEO_SEGMENT_VIDEO_FRAMEWORK_VIDEO_IMAGE_WRITER_UNIT_H */
 
-#include <unordered_map>
-using std::unordered_map;
-
-#include <unordered_set>
-using std::unordered_set;
-
-#include <functional>
-
-namespace base {
-
-// Like snprintf but for strings.
-std::string StringPrintf(const char* format, ...);
-
-// Returns true, if file exists.
-// TODO: this actually does not return true iff the file exists, but when the
-// location exists (could also be a directory ...).
-bool FileExists(const std::string& file);
-
-}  // namespace base.
-
-#endif   // VIDEO_SEGMENT_BASE_BASE_IMPL_H__

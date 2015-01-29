@@ -57,8 +57,8 @@ VideoReaderUnit::VideoReaderUnit(const VideoReaderOptions& options,
       video_file_(video_file) {
   codec_context_ = 0;
   format_context_ = 0;
-  frame_bgr_ = 0;
-  frame_yuv_ = 0;
+  frame_bgr_ = 0; // frame_bgr_ is an AVFrame
+  frame_yuv_ = 0; // frame_yuv_ is an AVFrame
 
   if (FLAGS_trim_to > 0) {
     options_.trim_frames = FLAGS_trim_to;
@@ -66,6 +66,9 @@ VideoReaderUnit::VideoReaderUnit(const VideoReaderOptions& options,
 }
 
 VideoReaderUnit::~VideoReaderUnit() {
+  // clean up the frames as described here:
+  // https://www.ffmpeg.org/doxygen/2.3/structAVFrame.html#details
+  // TODO: Why dont use av_frame_free For the frame?
   if (frame_bgr_) {
     av_free(frame_bgr_->data[0]);
     av_free(frame_bgr_);
@@ -81,7 +84,8 @@ VideoReaderUnit::~VideoReaderUnit() {
 }
 
 bool VideoReaderUnit::OpenStreams(StreamSet* set) {
-  // Setup FFMPEG.
+  // Setup FFMPEG:
+  // https://www.ffmpeg.org/doxygen/2.4/group__lavf__core.html#ga917265caec45ef5a0646356ed1a507e3
   if (!ffmpeg_initialized_) {
     ffmpeg_initialized_ = true;
     av_register_all();
@@ -89,7 +93,8 @@ bool VideoReaderUnit::OpenStreams(StreamSet* set) {
 
   // Open video file.
   AVFormatContext* format_context = nullptr;
-  if (avformat_open_input (&format_context, video_file_.c_str(), nullptr, nullptr) != 0) {
+  // Must be closed again with avformat_close_input.
+  if (avformat_open_input(&format_context, video_file_.c_str(), nullptr, nullptr) != 0) {
     LOG(ERROR) << "Could not open file: " << video_file_;
     return false;
   }
@@ -102,6 +107,7 @@ bool VideoReaderUnit::OpenStreams(StreamSet* set) {
   // Get video stream index.
   video_stream_idx_ = -1;
 
+  // AVFormatContext.nb_streams holds the number of elements in ACFormatContext.streams.
   for (uint i = 0; i < format_context->nb_streams; ++i) {
     if (format_context->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
       video_stream_idx_ = i;
@@ -115,7 +121,7 @@ bool VideoReaderUnit::OpenStreams(StreamSet* set) {
   }
 
   AVCodecContext* codec_context = format_context->streams[video_stream_idx_]->codec;
-  AVCodec* codec = avcodec_find_decoder (codec_context->codec_id);
+  AVCodec* codec = avcodec_find_decoder(codec_context->codec_id);
 
   if (!codec) {
     LOG(ERROR) << "Unsupported codec for file " << video_file_;
@@ -128,6 +134,7 @@ bool VideoReaderUnit::OpenStreams(StreamSet* set) {
   }
 
   AVStream* av_stream = format_context->streams[video_stream_idx_];
+  // av_q2d converts AVRational to double.
   fps_ = av_q2d(av_stream->avg_frame_rate);
   LOG(INFO) << "Frame rate: " << fps_;
 
@@ -219,6 +226,7 @@ bool VideoReaderUnit::OpenStreams(StreamSet* set) {
     return false;
   }
 
+  // Convert custom pixel format to FFMPEG pixel formats.
   int pix_fmt;
   switch (options_.pixel_format) {
     case PIXEL_FORMAT_RGB24:
@@ -247,10 +255,13 @@ bool VideoReaderUnit::OpenStreams(StreamSet* set) {
       break;
   }
 
+  // avpicture_get_size caluclates the size in bytes that a pixture of the given
+  // size and format would need.
   uint8_t* bgr_buffer = (uint8_t*)av_malloc(avpicture_get_size((::PixelFormat)pix_fmt,
                                                                output_width_,
                                                                output_height_));
 
+  // Sets up the picture fields using the allocated space.
   avpicture_fill((AVPicture*)frame_bgr_,
                  bgr_buffer,
                  (::PixelFormat)pix_fmt,
@@ -268,6 +279,7 @@ bool VideoReaderUnit::OpenStreams(StreamSet* set) {
                                 nullptr,
                                 nullptr,
                                 nullptr);
+  
   if(!sws_context_) {
     LOG(ERROR) << "Could not setup SwsContext for color conversion.";
     return false;
@@ -323,7 +335,7 @@ VideoFrame* VideoReaderUnit::ReadNextFrame() {
     return nullptr;
   }
 
-  // Test if we already have a read a package (e.g. Seek command)
+  // Test if we already have read a package (e.g. Seek command)
   if (next_packet_) {
     packet = *next_packet_;
     next_packet_.reset();
@@ -352,6 +364,8 @@ VideoFrame* VideoReaderUnit::ReadNextFrame() {
   do {
     if (packet.stream_index == video_stream_idx_) {
       int frame_finished;
+      // frame_finished is 0 if no frame could be decompressed, different
+      // from zero otherwise.
       int len = avcodec_decode_video2(codec_context_,
                                       frame_yuv_,
                                       &frame_finished,
@@ -363,6 +377,8 @@ VideoFrame* VideoReaderUnit::ReadNextFrame() {
       }
     }
     av_free_packet(&packet);
+    // av_read_frame reads the next frame of the stream;
+    // returns 0 if OK, < 0 if error or end of file.
   } while (av_read_frame(format_context_, &packet) >= 0); // Single frame could consists
                                                           // of multiple packages.
   LOG(ERROR) << "Unexpected end of ReadNextFrame()";

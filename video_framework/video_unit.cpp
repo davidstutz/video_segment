@@ -353,6 +353,7 @@ void VideoUnit::ProcessFrameImpl(FrameSetPtr frame_set_ptr, const VideoUnit* sen
       boost::posix_time::microsec_clock::local_time();
 
   // Call derived implementation function for this unit.
+  // Usually simply calls ProcessFrame!
   ProcessFrameFromSender(frame_set_ptr, &output, sender);
 
   // Consistency that size of each frame set corresponds with size of StreamSet.

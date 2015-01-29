@@ -48,7 +48,7 @@ bool LuminanceUnit::OpenStreams(StreamSet* set) {
   frame_width_ = vid_stream.frame_width();
   frame_height_ = vid_stream.frame_height();
   pixel_format_ = vid_stream.pixel_format();
-
+  
   if (pixel_format_ != PIXEL_FORMAT_RGB24 &&
       pixel_format_ != PIXEL_FORMAT_BGR24 &&
       pixel_format_ != PIXEL_FORMAT_RGBA32) {
@@ -56,6 +56,7 @@ bool LuminanceUnit::OpenStreams(StreamSet* set) {
     return false;
   }
 
+  // TODO: Why not using VideoStream.width_step()?
   width_step_ = frame_width_;
   if (width_step_ % 4) {
     width_step_ = width_step_ + (4 - width_step_ % 4);
@@ -78,6 +79,7 @@ void LuminanceUnit::ProcessFrame(FrameSetPtr input, list<FrameSetPtr>* output) {
   cv::Mat image;
   frame->MatView(&image);
 
+  // VideoFrame::VideoFrame(frame_width, frame_height, CHANNELS, width_step, ...)
   VideoFrame* lum_frame = new VideoFrame(frame_width_, frame_height_, 1, width_step_,
                                          frame->pts());
 
@@ -185,8 +187,10 @@ bool ColorTwist::OpenStreams(StreamSet* set) {
   return true;
 }
 
+// Anonymous namespace, functions only available in this file.
 namespace {
 
+  // Clip the given float to the range [0, 255].
 float clamp_uint8(float c) {
   return std::max(0.f, std::min(255.f, c));
 }

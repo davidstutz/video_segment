@@ -14,6 +14,7 @@ set(SOURCES video_unit.cpp
             flow_reader.cpp
             video_capture_unit.cpp
             video_pipeline.cpp
+            video_image_writer_unit.cpp
          )
 
 headers_from_sources_cpp(HEADERS "${SOURCES}")

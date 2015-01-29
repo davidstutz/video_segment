@@ -39,6 +39,9 @@ struct LuminanceOptions {
   std::string luminance_stream_name = "LuminanceStream";
 };
 
+// Unit used to change color format of frames.
+// Possible color changes are defined in enum VideoPixelFormat in
+// video_unit.h and then converted to the OpenCV equivalent ones.
 class LuminanceUnit : public VideoUnit {
 public:
   LuminanceUnit(const LuminanceOptions& options) : options_(options) { }
@@ -62,6 +65,7 @@ struct FlipBGROptions {
   std::string output_stream_name = "FlippedVideoStream";
 };
 
+// Unit used to switch B and R of RGB/BGR color format using OpenCV.
 class FlipBGRUnit : public VideoUnit {
 public:
   FlipBGRUnit(const FlipBGROptions& options) : options_(options) { }
@@ -78,14 +82,14 @@ private:
   int width_step_;
 };
 
-// Applies a global color twist weight[color] * color_value + offset[value],
-// clamped to [0, 255]. Operates in-place on the specified video stream.
 struct ColorTwistOptions {
   std::vector<float> weights;
   std::vector<float> offsets;
   std::string video_stream_name = "VideoStream";
 };
 
+// Applies a global color twist weight[color] * color_value + offset[value],
+// clamped to [0, 255]. Operates in-place on the specified video stream.
 class ColorTwist : public VideoUnit {
 public:
   ColorTwist(const ColorTwistOptions& options) : options_(options) {}

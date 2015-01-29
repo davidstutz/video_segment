@@ -195,8 +195,6 @@ private:
 // TODO(dcastro): LOWPRI: Implement an audio frame.
 
 // Basic Stream class.
-// base::TypedType simply allows different kinds of casting and provides AsPtr
-// AsRef methods.
 class DataStream : public base::TypedType {
 public:
   DataStream(const std::string& stream_name)
@@ -475,6 +473,8 @@ protected:
 
   // Called from parent unit for each output frame. Calls ProcessFrameFromSender for this
   // unit.
+  // ProcessFrameFromSender usually calls ProcessFrame, then calls
+  // ProcessFrameImpl for all children.
   virtual void ProcessFrameImpl(const FrameSetPtr frame_set_ptr,
                                 const VideoUnit* sender);
 

@@ -113,6 +113,7 @@ public:
   // root unit, pipeline source repeatedly calls ProcessFrame with an empty FrameSet
   // on the idle_unit.
   // For example, this can be used to monitor the state of the system.
+  // **Automatically attaches itself to the given sink!**
   VideoPipelineSource(VideoPipelineSink* sink,
                       VideoUnit* idle_unit = nullptr,
                       const SourceRatePolicy& policy = SourceRatePolicy(),
