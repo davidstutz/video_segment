@@ -97,7 +97,7 @@ bool DenseSegmentationUnit::OpenStreams(StreamSet* set) {
     return false;
   }
 
-  // Initialize actual segmentation object.
+  // Initialize segmentation object with the given options.
   dense_seg_ = CreateDenseSegmentation();
   SetRateBufferSize(dense_seg_->ChunkSize() * 3);
 
@@ -127,6 +127,7 @@ void DenseSegmentationUnit::ProcessFrame(FrameSetPtr input, list<FrameSetPtr>* o
   if (input_frames_ > 0 && flow_stream_idx_ >= 0) {
     const DenseFlowFrame& flow_frame =
       input->at(flow_stream_idx_)->As<DenseFlowFrame>();
+    // Get a two channel 32 float matrix.
     flow = flow_frame.MatViewInterleaved();
     DCHECK(!flow.empty());
   }
@@ -135,6 +136,7 @@ void DenseSegmentationUnit::ProcessFrame(FrameSetPtr input, list<FrameSetPtr>* o
   ++input_frames_;
 
   vector<std::unique_ptr<SegmentationDesc>> results;
+  // dense_seg_ ist the underlying DenseSegmentation object.
   if (dense_seg_->ProcessFrame(false,
                                &features,
                                flow_stream_idx_ >= 0 ? &flow : nullptr,

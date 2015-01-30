@@ -237,6 +237,8 @@ void DenseSegmentation::AddFrameToSegmentation(
   if (constrained_segmentation) {
     seg_->AddGenericImageConstrained(*constrained_segmentation, distance);
   } else {
+    // Adds the image to the segmentation which adds the correspdoning nodes and
+    // edges in the underlying segmentation graph.
     seg_->AddGenericImage(distance);
   }
 }

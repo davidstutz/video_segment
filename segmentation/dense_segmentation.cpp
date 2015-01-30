@@ -111,8 +111,11 @@ int DenseSegmentation::ProcessFrame(
     const cv::Mat* flow,  // optional.
     std::vector< std::unique_ptr<SegmentationDesc> >* results) {
   
+  // Initialize a new Segmentation object if none has been initialized
+  // previously.
   if (seg_ == nullptr) {
     SegmentationOptions seg_options;
+    // Writes current options in the given SegmentationOptiosn struct.
     GetSegmentationOptions(&seg_options);
     seg_.reset(new Segmentation(seg_options, frame_width_, frame_height_, chunk_id_));
     seg_->InitializeOverSegmentation(*this, options_.chunk_size);
@@ -120,9 +123,12 @@ int DenseSegmentation::ProcessFrame(
 
   LOG(INFO) << "Processing frame " << input_frames_;
 
+  // nullptr is passed to features if only results are requested!
   if (features) {
     // Parallel construction of the graph, buffer features and flow.
     vector<cv::Mat> processed_features(features->size());
+    // Applie biliteral or gaussian filtering on features
+    // (which are mostly equivalent to the color image).
     PreprocessFeatures(*features, &processed_features);
     feature_buffer_.push_back(processed_features);
 
@@ -162,6 +168,9 @@ int DenseSegmentation::ProcessFrame(
     return results->size();
   }
   
+  // Usually returns 0, except in the case that the underlying Segmentation
+  // object finished the processing of the given frames (a fixed number of frames -
+  // the chunk size).
   return 0;
 }
 
@@ -210,6 +219,9 @@ void DenseSegmentation::AddFrameToSegmentationFromFeatures(
   const cv::Mat& input_frame = curr_features[0];
   switch (options_.color_distance) {
     case DenseSegmentationOptions::COLOR_DISTANCE_L2: {
+      // Defines in pixel_distance.h:
+      // Creates a distance wrapper around the frame/image allowing to 
+      // do different types of distance queries.
       SpatialCvMatDistance3L2 color_distance(input_frame);
       // Basically calls Segmentation.addGenericImage
       AddFrameToSegmentation(color_distance, constrained_segmentation);
@@ -217,6 +229,7 @@ void DenseSegmentation::AddFrameToSegmentationFromFeatures(
     }
 
     case DenseSegmentationOptions::COLOR_DISTANCE_L1: {
+      // Same as above!
       SpatialCvMatDistance3L1 color_distance(input_frame);
       AddFrameToSegmentation(color_distance, constrained_segmentation);
       break;
