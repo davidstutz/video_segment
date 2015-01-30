@@ -47,7 +47,7 @@ namespace retinex {
      * The threshold to use for Retinex PDE.
      * For images in RGB 8 bit color space, the threshold should be in (0,255].
      */
-    float threshold = 10;
+    float threshold = 5;
     std::string video_stream_name = "VideoStream";
     std::string reflectance_stream_name = "ReflectanceStream";
     std::string shading_stream_name = "ShadingStream";

@@ -30,6 +30,7 @@
 
 #include "limare2011-intrinsic-images/retinex_pde_lib_wrapper.h"
 #include <opencv2/opencv.hpp>
+#include "base/base_clock.h"
 
 namespace retinex {
   using namespace video_framework;
@@ -129,9 +130,14 @@ namespace retinex {
       return;
     }
     
-    LOG(INFO) << "Retinex PDE for frame #" << input_frames_ << ".\n";
+    BASE_CLOCK_RESET(0);
+    BASE_CLOCK_TOGGLE(0);
     RetinexPDE(frame_mat, options_.threshold, &reflectance);
     RetinexPDE_Shading(frame_mat, reflectance, &shading);
+    BASE_CLOCK_TOGGLE(0);
+    LOG(INFO) << "Retinex PDE for frame #" << input_frames_ << " (" << BASE_CLOCK_S(0) << "s).\n";
+    
+    //cv::imwrite(std::to_string(input_frames_) + ".png", reflectance);
     ++input_frames_;
     
     input->push_back(std::shared_ptr<DataFrame>(reflectance_frame));

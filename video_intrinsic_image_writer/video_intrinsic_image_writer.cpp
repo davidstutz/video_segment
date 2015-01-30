@@ -39,6 +39,7 @@
 DEFINE_string(input_file, "", "input video to save as image sequence");
 DEFINE_string(output_folder, "", "output folder for image sequence");
 DEFINE_bool(logging, false, "enable logging");  
+DEFINE_double(threshold, 5.0, "threshold for Retinex PDE");
 
 int main(int argc, char** argv) {
   google::InitGoogleLogging(argv[0]);
@@ -90,7 +91,7 @@ int main(int argc, char** argv) {
   input = sources.back().get();
   
   retinex::RetinexPDEOptions retinex_pde_options;
-  retinex_pde_options.threshold = 10.f;
+  retinex_pde_options.threshold = (float) FLAGS_threshold;
   
   std::unique_ptr<retinex::RetinexPDEUnit> retinex_pde(new retinex::RetinexPDEUnit(retinex_pde_options));
   retinex_pde->AttachTo(input);
