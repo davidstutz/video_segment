@@ -19,6 +19,20 @@ try and let us know.
 We have put together preliminary commands to build and run seg_tree_sample on
 a fresh installation of Ubuntu 14.04 LTS. [You may see those here](https://docs.google.com/document/d/1idKVuSn-8Muhx4bIk5peXzaaYmDgK8bDgw4mgMn8gUY/edit?usp=sharing).
 
+**Alternative:** Install `libx264` using `sudo apt-get install libx264-dev`. Download FFMPEG **2.2.3** and configure as follows:
+
+    ./configure --enable-nonfree --enable-gpl --enable-pic --enable-shared --enable-libx264 --disable-vaapi
+
+Then, download and install OpenCV **2.4.10**. Check that CMake recognizes the correct FFMPEG installation:
+
+    FFMPEG:                      YES
+      codec:                     YES (ver 55.52.102)
+      format:                    YES (ver 55.33.100)
+      util:                      YES (ver 52.66.100)
+      swscale:                   YES (ver 2.5.102)
+      gentoo-style:              YES
+
+
 ## Documentation
 
 There are several resources for diving directly into the code:
@@ -41,6 +55,14 @@ Assuming source is checked out under ~/video_segment
     cd seg_tree_sample_release
     cmake ../seg_tree_sample
     make -j4
+
+## Building Issues
+
+The following links might help to resolve building issues:
+
+* [https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu)
+* [http://stackoverflow.com/questions/9803726/failed-to-compile-http-live-video-stream-segmenter-and-distributor](http://stackoverflow.com/questions/9803726/failed-to-compile-http-live-video-stream-segmenter-and-distributor)
+* [http://www.linuxquestions.org/questions/linux-newbie-8/problem-with-enable-libx264-option-in-ffmpeg-822156/](http://www.linuxquestions.org/questions/linux-newbie-8/problem-with-enable-libx264-option-in-ffmpeg-822156/)
 
 ## Executables
 
