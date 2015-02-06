@@ -311,7 +311,7 @@ int VideoWriterUnit::EncodeFrame(AVFrame* frame, int* got_frame) {
                               codec_context_->time_base,
                               video_stream_->time_base);
   }
-
+  
   if (codec_context_->coded_frame->key_frame) {
     packet.flags |= AV_PKT_FLAG_KEY;
   }

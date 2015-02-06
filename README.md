@@ -32,6 +32,7 @@ Then, download and install OpenCV **2.4.10**. Check that CMake recognizes the co
       swscale:                   YES (ver 2.5.102)
       gentoo-style:              YES
 
+**Note:** The alternative solution still yields problems when writing to `.mov` files, use `.avi` instead!
 
 ## Documentation
 

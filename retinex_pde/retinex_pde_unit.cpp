@@ -135,7 +135,10 @@ namespace retinex {
     RetinexPDE(frame_mat, options_.threshold, &reflectance);
     RetinexPDE_Shading(frame_mat, reflectance, &shading);
     BASE_CLOCK_TOGGLE(0);
-    LOG(INFO) << "Retinex PDE for frame #" << input_frames_ << " (" << BASE_CLOCK_S(0) << "s).\n";
+    
+    if (input_frames_ % 10 == 0) {
+      LOG(INFO) << "Retinex PDE for frame #" << input_frames_ << " (" << BASE_CLOCK_S(0) << "s).\n";
+    }
     
     //cv::imwrite(std::to_string(input_frames_) + ".png", reflectance);
     ++input_frames_;
